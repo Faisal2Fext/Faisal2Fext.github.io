@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Timeline</title>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #ff8e8e;
+            --accent: #ffd93d;
+        }
+
+        body {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            color: white;
+            overflow: hidden;
+        }
+
+        body:not(.loaded) {
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        body.loaded {
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .header h1 {
+            font-family: 'Brush Script MT', cursive;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .counter-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .counter-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .counter-number {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 300;
+            background: linear-gradient(to right, #fff, #ffe8e8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 1rem 0;
+            display: inline-block;
+        }
+
+        .hearts {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            animation: float 4s infinite linear;
+            opacity: 0.3;
+            font-size: 1.5rem;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-120%) rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .counter-card {
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts" id="hearts"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Alex & Sam's Love Journey</h1>
+        </div>
+
+        <div class="counter-card" data-start-date="2020-03-15">
+            <h2>❤️ Relationship Days</h2>
+            <div class="counter-number" id="relationship-days">0</div>
+            <p>"Every day with you is a new adventure"</p>
+        </div>
+
+        <div class="counter-card" data-start-date="2023-06-20">
+            <h2>💍 Marriage Days</h2>
+            <div class="counter-number" id="marriage-days">0</div>
+            <p>"Our forever started here"</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize after DOM loads
+        window.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('loaded');
+            createHearts();
+            updateCounters();
+            setInterval(updateCounters, 1000);
+            window.addEventListener('resize', createHearts);
+        });
+
+        // Heart particle generator
+        function createHearts() {
+            const heartsContainer = document.getElementById('hearts');
+            heartsContainer.innerHTML = '';
+            
+            const heartCount = Math.floor(window.innerWidth / 50);
+            for(let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤';
+                heart.className = 'heart';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = Math.random() * 3 + 2 + 's';
+                heartsContainer.appendChild(heart);
+            }
+        }
+
+        // Date validation
+        function isValidDate(dateString) {
+            return !isNaN(Date.parse(dateString));
+        }
+
+        // Accurate day calculation
+        function calculateDays(startDate) {
+            if(!isValidDate(startDate)) return 0;
+            
+            const start = new Date(startDate);
+            const now = new Date();
+            
+            start.setUTCHours(0,0,0,0);
+            now.setUTCHours(0,0,0,0);
+            
+            return Math.floor((now - start) / (1000 * 60 * 60 * 24));
+        }
+
+        // Update counters safely
+        function updateCounters() {
+            document.querySelectorAll('[data-start-date]').forEach(card => {
+                const days = calculateDays(card.dataset.startDate);
+                const display = card.querySelector('.counter-number');
+                if(display) display.textContent = days;
+            });
+        }
+
+        // Number animation
+        document.querySelectorAll('.counter-number').forEach(el => {
+            el.addEventListener('DOMSubtreeModified', () => {
+                el.style.transform = 'scale(1.1)';
+                setTimeout(() => el.style.transform = 'scale(1)', 300);
+            });
+        });
+    </script>
+</body>
+</html>
